@@ -1,0 +1,26 @@
+Package: creditratingsystem
+Type: Package
+Title: Offline Credit Risk Modelling, Calibration and Validation
+Version: 0.1.0
+Authors@R: c(
+    person("RiskDataScience GmbH", role = c("aut", "cph")),
+    person("Dimitrios", "Geromichalos", email = "riskdatascience@web.de",
+           role = "cre", comment = "Dr."))
+Description: Native credit risk calculations, statistical
+    estimation, calibration, validation and cash flow simulation using local
+    structured data. Methods cover consumer and business lending with
+    explicit modelling assumptions, diagnostics and reproducible reference data.
+License: AGPL-3
+Encoding: UTF-8
+Depends: R (>= 4.1.2)
+Imports: stats, utils, jsonlite, digest, lpSolve, Matrix, survival,
+        glmnet, MASS, e1071, brglm2, splines, xgboost, copula, mvtnorm,
+        vars, urca, KFAS
+Suggests: testthat, knitr, rmarkdown
+NeedsCompilation: no
+Packaged: 2026-10-16 14:09:40 UTC; qwert123
+Author: RiskDataScience GmbH [aut, cph],
+  Dimitrios Geromichalos [cre] (Dr.)
+Maintainer: Dimitrios Geromichalos <riskdatascience@web.de>
+Repository: CRAN
+Date/Publication: 2026-10-28 11:20:21 UTC
