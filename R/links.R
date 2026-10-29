@@ -94,7 +94,7 @@ apply_parent_support<-function(standalone_risk,parent_risk,support_contract,join
  total<-.cr_link_scalar(contract$total_capacity,'total_capacity',0);reserved<-.cr_link_scalar(contract$reserved_elsewhere,'reserved_elsewhere',0);capacity<-.cr_link_scalar(contract$allocated_capacity,'allocated_capacity',0);required<-.cr_link_scalar(contract$support_required,'support_required',0)
  if(required<=0||reserved>total||capacity>total-reserved) .cr_error('SUPPORT_CAPACITY','Positive required amount and allocation within remaining total budget required')
  states<-.cr_link_object(contract$states,'states');if(!setequal(names(states),c('parent_alive','joint_default'))||anyDuplicated(names(states))) .cr_error('SUPPORT_STATES','Both parent-alive and joint-default conditional states are required')
- j<-.cr_link_p(joint_default_probability,'joint_default_probability');lower<-max(0,sum(c(p,q,-1)));if(j<lower||j>min(p,q)) .cr_error('INVALID_JOINT_PROBABILITY','Child/supporter intersection outside Frechet bounds')
+ j<-.cr_link_p(joint_default_probability,'joint_default_probability');lower<-max(0,min(p,q)-(1-max(p,q)));if(j<lower||j>min(p,q)) .cr_error('INVALID_JOINT_PROBABILITY','Child/supporter intersection outside Frechet bounds')
  details<-list();rescued<-numeric();masses<-c(parent_alive=p-j,joint_default=j)
  for(state in names(masses)){mass<-unname(masses[state]);terms<-.cr_link_object(states[[state]],state);.cr_data_required(terms,c('available_capacity','willingness_given_state','success_given_willing_and_funded','support_permitted','evidence_reference'));available<-.cr_link_scalar(terms$available_capacity,'available_capacity',0)
   if(available>capacity||!is.logical(terms$support_permitted)||length(terms$support_permitted)!=1L||is.na(terms$support_permitted)) .cr_error('SUPPORT_CAPACITY','State capacity cannot exceed earmarked capacity; permission must be Boolean')
@@ -148,9 +148,9 @@ apply_guarantee_risk<-function(borrower_risk,guarantor_risk,coverage_allocation,
  if(!length(matches)&&!any(vapply(allocation$uncovered_claims,function(r)r$claim_id==claim_id,logical(1)))) .cr_error('GUARANTEE_CLAIM','Claim is absent from frozen allocation')
  if(any(vapply(matches,function(r)r$entity_id!=b$risk$entity_id||r$guarantor_id!=g$risk$entity_id,logical(1)))) .cr_error('GUARANTEE_JOINT_STATES','All allocated protection on claim must belong to borrower and one guarantor; multiple guarantors require joint event model')
  covered<-sum(vapply(matches,function(r)r$covered_amount,numeric(1)));j<-.cr_link_p(joint_default_probability,'joint_default_probability')
- # Accumulate the three terms together, matching the stable parent-support bound.
- # Sequential (p+q)-1 spuriously rejects p=1, q=.1, j=.1.
- if(j<max(0,sum(c(p,q,-1)))||j>min(p,q)) .cr_error('INVALID_JOINT_PROBABILITY','Borrower/guarantor intersection outside Frechet bounds')
+ # Subtract the larger marginal from one first: this is exact when it is
+ # >= .5 and avoids relying on platform-dependent extended-precision sums.
+ if(j<max(0,min(p,q)-(1-max(p,q)))||j>min(p,q)) .cr_error('INVALID_JOINT_PROBABILITY','Borrower/guarantor intersection outside Frechet bounds')
  states<-.cr_link_object(contract$states,'states');if(!setequal(names(states),c('borrower_only','joint_default'))) .cr_error('GUARANTEE_STATES','Explicit conditional borrower-only and joint-default loss/payout terms required')
  rows<-list();masses<-c(p-j,j)
  for(i in seq_len(2)){name<-c('borrower_only','joint_default')[i];terms<-.cr_link_object(states[[name]],name);.cr_data_required(terms,c('loss_before_guarantee','payout_fraction','evidence_reference'));.cr_string(terms$evidence_reference,'evidence_reference','LINK_CONTRACT');loss<-.cr_link_scalar(terms$loss_before_guarantee,'loss_before_guarantee');fraction<-.cr_link_p(terms$payout_fraction,'payout_fraction');payment<-min(covered,max(loss,0))*fraction

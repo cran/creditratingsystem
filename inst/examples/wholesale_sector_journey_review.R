@@ -1,4 +1,11 @@
 # Actual source-to-claim bindings, independent historical replay and absent benchmarks.
+.sector_source_number_equal <- function(actual,expected) {
+ # CSV and JSON decimal readers can differ by a few ulps on noLD platforms.
+ # Keep this tolerance local to numeric source bindings; IDs remain exact.
+ is.numeric(actual) && length(actual)==1L && is.finite(actual) &&
+  is.numeric(expected) && length(expected)==1L && is.finite(expected) &&
+  abs(actual-expected) <= 8*.Machine$double.eps*max(1,abs(actual),abs(expected))
+}
 .sector_journey_replay <- function(audit,source){
  registry<-audit$registry;request<-audit$requests[[2]];cutoff<-request$known_at;sid<-request$input$snapshot$subject_id;seen<-list();log<-list()
  for(event in request$input$events){
@@ -42,7 +49,7 @@ run_wholesale_sector_journey_review <- function(data=NULL,verify_reference=TRUE,
  rows<-setNames(lineage$rows,vapply(lineage$rows,function(x)x$entity_id,character(1)))
  for(i in seq_along(data$governance$cases)){
   case<-data$governance$cases[[i]];claim<-Filter(function(x)x$case_id==case$case_id,data$claims)[[1]];source<-rows[[case$case_id]]
-  if(source$product_id!=case$product||source$balance!=claim$source_balance||source$x!=case$features[[1]][[1]])stop('Source must bind the actual claim balance, product and frozen financial design coordinate')
+  if(source$product_id!=case$product||!.sector_source_number_equal(source$balance,claim$source_balance)||!.sector_source_number_equal(source$x,case$features[[1]][[1]]))stop('Source must bind the actual claim balance, product and frozen financial design coordinate')
   data$governance$cases[[i]]$features<-list(list(source$x))
  }
  governance<-ge$run_wholesale_sector_governance(data$governance,artifact_paths=artifact_paths,return_audit_artifacts=TRUE);out<-list();artifacts<-list()

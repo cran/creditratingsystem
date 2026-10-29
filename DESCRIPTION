@@ -1,7 +1,7 @@
 Package: creditratingsystem
 Type: Package
 Title: Offline Credit Risk Modelling, Calibration and Validation
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("RiskDataScience GmbH", role = c("aut", "cph")),
     person("Dimitrios", "Geromichalos", email = "riskdatascience@web.de",
@@ -18,9 +18,9 @@ Imports: stats, utils, jsonlite, digest, lpSolve, Matrix, survival,
         vars, urca, KFAS
 Suggests: testthat, knitr, rmarkdown
 NeedsCompilation: no
-Packaged: 2026-10-16 14:09:40 UTC; qwert123
+Packaged: 2026-10-29 09:19:24 UTC; qwert123
 Author: RiskDataScience GmbH [aut, cph],
   Dimitrios Geromichalos [cre] (Dr.)
 Maintainer: Dimitrios Geromichalos <riskdatascience@web.de>
 Repository: CRAN
-Date/Publication: 2026-10-28 11:20:21 UTC
+Date/Publication: 2026-10-29 11:30:17 UTC

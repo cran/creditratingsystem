@@ -36,6 +36,21 @@ for(qb in c(.1,.2,.7)){
  lk_error('INVALID_JOINT_PROBABILITY',apply_guarantee_risk(cb,gb,a,'c',lc,qb-1e-7))
  lk_error('INVALID_JOINT_PROBABILITY',apply_guarantee_risk(cb,gb,a,'c',lc,qb+1e-7))
 }
+# The certain event can be either marginal; support uses the same bounds.
+for(qb in c(.1,.2,.7)) for(certain_child in c(TRUE,FALSE)){
+ cb<-child;cb$pd<-if(certain_child)1 else qb
+ gb<-guarantor;gb$pd<-if(certain_child)qb else 1
+ rb<-apply_guarantee_risk(cb,gb,a,'c',lc,qb)$value
+ lk_near(rb$expected_loss_after,if(certain_child)20*(1-qb)+100*qb else 100*qb)
+ sc<-support;sc$states$parent_alive$available_capacity<-100
+ pb<-parent;pb$pd<-gb$pd
+ sb<-apply_parent_support(cb,pb,sc,qb)$value
+ lk_near(sb$pd,if(certain_child).5+.5*qb else qb)
+ for(delta in c(-1e-7,1e-7)){
+  lk_error('INVALID_JOINT_PROBABILITY',apply_guarantee_risk(cb,gb,a,'c',lc,qb+delta))
+  lk_error('INVALID_JOINT_PROBABILITY',apply_parent_support(cb,pb,sc,qb+delta))
+ }
+}
 scale<-list(schema_version='1.0',scale_id='test',version='1',boundary_convention='left_closed',grades=list(list(grade='A',lower=0,upper=.01,representative_pd=.005,is_default=FALSE),list(grade='B',lower=.01,upper=.1,representative_pd=.05,is_default=FALSE),list(grade='C',lower=.1,upper=1,representative_pd=.5,is_default=FALSE)))
 base<-list(pd=.023,grade='B');rule<-list(rule_id='bound',kind='grade_bounds',best_allowed_grade='A',worst_allowed_grade='B',evidence_reference='policy');stopifnot(apply_rating_constraints(base,scale,list(rule),'representative_on_binding')$value$pd==.023)
 rule$worst_allowed_grade<-'A';r<-apply_rating_constraints(base,scale,list(rule),'preserve_pd');stopifnot(r$value$pd==.023,r$value$grade=='A',!r$value$pd_grade_consistent)
